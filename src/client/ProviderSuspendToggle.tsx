@@ -110,12 +110,12 @@ export function ProviderSuspendToggle(props: ProviderSuspendToggleProps) {
   const entry = stashes[stashKey]
   const legacy = entry === undefined && stashKey !== ns ? stashes[ns] : undefined
   const suspended = entry !== undefined || legacy !== undefined
-  const label = suspended ? '恢复 Provider' : '挂起 Provider'
+  const label = suspended ? 'Resume provider' : 'Suspend provider'
 
   async function suspend() {
     const settings = remote?.settings
     if (!settings?.describe || !settings.mutate) {
-      console.warn('[sidebar-visibility] remote.settings 不可用')
+      console.warn('[sidebar-visibility] remote.settings is unavailable')
       return
     }
     const desc = await settings.describe()
@@ -187,7 +187,7 @@ export function ProviderSuspendToggle(props: ProviderSuspendToggleProps) {
       if (suspended) await resume()
       else await suspend()
     } catch (error) {
-      console.warn('[sidebar-visibility] provider 挂起/恢复失败', error)
+      console.warn('[sidebar-visibility] provider suspend/resume failed', error)
     } finally {
       setBusy(false)
     }
@@ -201,8 +201,8 @@ export function ProviderSuspendToggle(props: ProviderSuspendToggleProps) {
       onClick: onToggle,
       'data-visibility-provider': ns,
       title: suspended
-        ? '恢复该 Provider：暂存的配置写回，模型立即可选'
-        : '挂起该 Provider：配置保留在本插件暂存区，模型从可选项中消失，可随时恢复',
+        ? 'Resume this provider: stashed config is written back and its models are selectable again'
+        : "Suspend this provider: config is kept in this plugin's stash, its models disappear from the options, and you can resume anytime",
     },
     busy ? '…' : label,
   )

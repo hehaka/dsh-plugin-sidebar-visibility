@@ -26,10 +26,10 @@ export function TreeModeToggle(props: TreeModeToggleProps) {
   React.useEffect(() => subscribeVisibility(() => force()), [])
   const plugin = getVisibility().treeMode === 'plugin'
   const wide = props.wide !== false
-  const label = plugin ? '插件列表' : '原始列表'
+  const label = plugin ? 'Plugin list' : 'Original list'
   const title = plugin
-    ? '当前：插件增强会话列表（点击切换到官方原始列表）'
-    : '当前：官方原始会话列表（点击切换到插件增强列表）'
+    ? 'Current: plugin-enhanced session list (click to switch to the official original list)'
+    : 'Current: official original session list (click to switch to the plugin-enhanced list)'
 
   const styleTag = React.createElement(
     'style',
@@ -59,7 +59,7 @@ export function TreeModeToggle(props: TreeModeToggleProps) {
       ? React.createElement(
           'span',
           { style: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } },
-          `会话列表：${label}`,
+          `Session list: ${label}`,
         )
       : null,
   )

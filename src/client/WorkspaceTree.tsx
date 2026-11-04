@@ -341,7 +341,7 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
       .map(visibleSession)
       .filter(Boolean) as SessionSummaryLike[]
     if (ungrouped.length > 0) {
-      groups.push({ workspace: null, key: '__ungrouped__', title: '未分组', sessions: ungrouped })
+      groups.push({ workspace: null, key: '__ungrouped__', title: 'Ungrouped', sessions: ungrouped })
     }
     return groups.map((g) => ({ ...g, sessions: ordered(g.sessions) }))
   }
@@ -413,7 +413,7 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
     const pending = renameSession?.(renaming.id, title)
     if (pending === undefined) {
       setRenameBusy(false)
-      setRenameError('宿主未提供重命名动作')
+      setRenameError('The host does not provide a rename action')
       return
     }
     pending
@@ -463,21 +463,21 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
     const actions = React.createElement(
       'span',
       { className: 'dshsv-rowActions' },
-      React.createElement('button', { type: 'button', className: 'dshsv-btn dshsv-btnSm', title: '重命名该会话', onClick: () => startRename(s) }, '重命名'),
+      React.createElement('button', { type: 'button', className: 'dshsv-btn dshsv-btnSm', title: 'Rename this session', onClick: () => startRename(s) }, 'Rename'),
       React.createElement(
         'button',
-        { type: 'button', className: 'dshsv-btn dshsv-btnSm', title: '从该会话的最后一个完整回合分叉出新会话', onClick: () => forkSession?.(s.id) },
-        '分叉',
+        { type: 'button', className: 'dshsv-btn dshsv-btnSm', title: 'Fork a new session from the last complete turn of this session', onClick: () => forkSession?.(s.id) },
+        'Fork',
       ),
       React.createElement(
         'button',
         {
           type: 'button',
           className: 'dshsv-btn dshsv-btnSm',
-          title: '归档该会话（可在「设置 → 已归档会话」恢复）',
+          title: 'Archive this session (it can be restored from the archived list)',
           onClick: () => requestArchive(s.id),
         },
-        '归档',
+        'Archive',
       ),
     )
 
@@ -522,7 +522,7 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
                 value: editing.draft,
                 autoFocus: true,
                 disabled: renameBusy,
-                'aria-label': '重命名会话',
+                'aria-label': 'Rename session',
                 style: { width: '100%', boxSizing: 'border-box', fontSize: 11, padding: '1px 4px' },
                 onChange: (e: React.ChangeEvent<HTMLInputElement>) => setRenaming({ id: s.id, draft: e.target.value }),
                 onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -559,8 +559,8 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
           ? React.createElement('span', {
               className: 'dshsv-unread',
               role: 'img',
-              'aria-label': '未读',
-              title: '该会话已完成，尚未查看',
+              'aria-label': 'Unread',
+              title: 'This session has finished and has not been viewed yet',
             })
           : null,
         React.createElement(
@@ -568,8 +568,8 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
           {
             type: 'button',
             className: 'dshsv-btn',
-            title: pinnedSet.has(s.id) ? '取消置顶该会话' : '置顶该会话（跨工作区集中显示）',
-            'aria-label': pinnedSet.has(s.id) ? '取消置顶' : '置顶该会话',
+            title: pinnedSet.has(s.id) ? 'Unpin this session' : 'Pin this session (shown together across workspaces)',
+            'aria-label': pinnedSet.has(s.id) ? 'Unpin' : 'Pin this session',
             'aria-pressed': pinnedSet.has(s.id),
             onClick: () => requestPinToggle(s.id),
           },
@@ -580,7 +580,7 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
           {
             type: 'button',
             className: 'dshsv-btn',
-            title: favorites.has(s.id) ? '取消收藏' : '收藏',
+            title: favorites.has(s.id) ? 'Remove from favorites' : 'Favorite',
             onClick: () => toggleFavoriteSession(s.id),
           },
           favorites.has(s.id) ? '★' : '☆',
@@ -592,8 +592,8 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
         : React.createElement(
             'span',
             { className: 'dshsv-rowActions', style: { display: 'flex' } },
-            React.createElement('button', { type: 'button', className: 'dshsv-btn dshsv-btnSm', disabled: renameBusy, onClick: confirmRename }, '确定'),
-            React.createElement('button', { type: 'button', className: 'dshsv-btn dshsv-btnSm', disabled: renameBusy, onClick: cancelRename }, '取消'),
+            React.createElement('button', { type: 'button', className: 'dshsv-btn dshsv-btnSm', disabled: renameBusy, onClick: confirmRename }, 'OK'),
+            React.createElement('button', { type: 'button', className: 'dshsv-btn dshsv-btnSm', disabled: renameBusy, onClick: cancelRename }, 'Cancel'),
           ),
     )
   }
@@ -622,9 +622,9 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
           'span',
           {
             style: { flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-            title: '跨工作区集中显示已置顶会话（按最近更新排序）',
+            title: 'Pinned sessions shown together across workspaces (sorted by recent update)',
           },
-          `置顶（${rows.length}）`,
+          `Pinned (${rows.length})`,
         ),
       ),
       React.createElement('div', { className: 'dshsv-rowList' }, rows.map((s) => sessionRow(s))),
@@ -753,8 +753,8 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
                 type: 'button',
                 className: 'dshsv-btn dshsv-caret',
                 'aria-expanded': !isCollapsed,
-                'aria-label': `${isCollapsed ? '展开' : '折叠'}工作区 ${g.title}`,
-                title: isCollapsed ? '展开该工作区' : '折叠该工作区（收起组内会话）',
+                'aria-label': `${isCollapsed ? 'Expand' : 'Collapse'} workspace ${g.title}`,
+                title: isCollapsed ? 'Expand this workspace' : 'Collapse this workspace (hide its sessions)',
                 onClick: () => toggleCollapsedWorkspace(g.key),
               },
               isCollapsed ? '▸' : '▾',
@@ -783,10 +783,10 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
               {
                 type: 'button',
                 className: 'dshsv-btn',
-                title: isHidden ? '恢复显示该工作区' : '隐藏该工作区（可恢复，会话数据不受影响）',
+                title: isHidden ? 'Show this workspace again' : 'Hide this workspace (restorable; session data is not affected)',
                 onClick: () => toggleHiddenWorkspace(g.key),
               },
-              isHidden ? '恢复' : '隐藏',
+              isHidden ? 'Restore' : 'Hide',
             )
           : null,
         // 新建会话：与官方项目行右侧的加号同一语义，先展开分组再进入新建流程。
@@ -796,8 +796,8 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
               {
                 type: 'button',
                 className: 'dshsv-btn',
-                'aria-label': `在“${g.title}”中新建会话`,
-                title: `在“${g.title}”中新建会话`,
+                'aria-label': `New session in "${g.title}"`,
+                title: `New session in "${g.title}"`,
                 onClick: () => {
                   if (isCollapsed) toggleCollapsedWorkspace(g.key)
                   startSession?.(g.key)
@@ -1038,8 +1038,8 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
                 type: 'button',
                 className: 'dshsv-btn dshsv-caret',
                 'aria-expanded': !isCollapsed,
-                'aria-label': (isCollapsed ? '展开' : '折叠') + '工作区 ' + g.title,
-                title: isCollapsed ? '展开该工作区（含子工作区）' : '折叠该工作区（收起整棵子树）',
+                'aria-label': (isCollapsed ? 'Expand' : 'Collapse') + ' workspace ' + g.title,
+                title: isCollapsed ? 'Expand this workspace (including sub-workspaces)' : 'Collapse this workspace (hide the whole subtree)',
                 onClick: () => toggleCollapsedWorkspace(g.key),
               },
               isCollapsed ? '▸' : '▾',
@@ -1071,10 +1071,10 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
               {
                 type: 'button',
                 className: 'dshsv-btn',
-                title: '隐藏该工作区（可恢复，会话数据不受影响；子工作区自动上提）',
+                title: 'Hide this workspace (restorable; session data is not affected; sub-workspaces move up automatically)',
                 onClick: () => toggleHiddenWorkspace(g.key),
               },
-              '隐藏',
+              'Hide',
             ),
         isPseudo
           ? null
@@ -1083,8 +1083,8 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
               {
                 type: 'button',
                 className: 'dshsv-btn',
-                'aria-label': '在“' + g.title + '”中新建会话',
-                title: '在“' + g.title + '”中新建会话',
+                'aria-label': 'New session in "' + g.title + '"',
+                title: 'New session in "' + g.title + '"',
                 onClick: () => {
                   if (isCollapsed) toggleCollapsedWorkspace(g.key)
                   startSession?.(g.key)
@@ -1113,8 +1113,8 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
       ),
       React.createElement(
         'button',
-        { type: 'button', className: 'dshsv-btn', title: '恢复显示该工作区', onClick: () => toggleHiddenWorkspace(g.key) },
-        '恢复',
+        { type: 'button', className: 'dshsv-btn', title: 'Show this workspace again', onClick: () => toggleHiddenWorkspace(g.key) },
+        'Restore',
       ),
     )
 
@@ -1145,16 +1145,16 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
       React.createElement('input', {
         type: 'search',
         value: query,
-        placeholder: '查找会话…',
-        'aria-label': '查找会话',
+        placeholder: 'Find sessions…',
+        'aria-label': 'Find sessions',
         style: searchInputStyle,
         onChange: (e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value),
         onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => {
           if (e.key === 'Escape') setQuery('')
         },
       }),
-      searchPhase === 'loading' ? React.createElement('span', { style: { fontSize: 11, opacity: 0.6 } }, '检索中') : null,
-      searchPhase === 'error' ? React.createElement('span', { style: { fontSize: 11, opacity: 0.6 }, title: `内容检索不可用，仅显示本地匹配：${searchError ?? 'unknown'}` }, '仅本地') : null,
+      searchPhase === 'loading' ? React.createElement('span', { style: { fontSize: 11, opacity: 0.6 } }, 'Searching') : null,
+      searchPhase === 'error' ? React.createElement('span', { style: { fontSize: 11, opacity: 0.6 }, title: `Content search unavailable, showing local matches only: ${searchError ?? 'unknown'}` }, 'Local only') : null,
     ),
     // 视图选项：分组模式 + 排序档位 + 仅收藏
     React.createElement(
@@ -1163,34 +1163,34 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
       React.createElement(
         'label',
         { style: { display: 'flex', gap: 3, alignItems: 'center', fontSize: 11 } },
-        '视图',
+        'View',
         React.createElement(
           'select',
           {
             value: groupBy,
-            'aria-label': '分组模式',
+            'aria-label': 'Grouping mode',
             style: selectStyle,
             onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setGroupBy(e.target.value as SessionGroupBy),
           },
-          React.createElement('option', { value: 'workspace-tree' }, '按目录树'),
-          React.createElement('option', { value: 'workspace' }, '按工作区'),
-          React.createElement('option', { value: 'flat' }, '一个列表'),
+          React.createElement('option', { value: 'workspace-tree' }, 'By directory tree'),
+          React.createElement('option', { value: 'workspace' }, 'By workspace'),
+          React.createElement('option', { value: 'flat' }, 'Single list'),
         ),
       ),
       React.createElement(
         'label',
         { style: { display: 'flex', gap: 3, alignItems: 'center', fontSize: 11 } },
-        '排序',
+        'Sort',
         React.createElement(
           'select',
           {
             value: orderBy,
-            'aria-label': '排序方式',
+            'aria-label': 'Sort order',
             style: selectStyle,
             onChange: (e: React.ChangeEvent<HTMLSelectElement>) => setOrderBy(e.target.value as SessionOrderBy),
           },
-          React.createElement('option', { value: 'manual' }, 'Host 顺序'),
-          React.createElement('option', { value: 'updated' }, '最近更新'),
+          React.createElement('option', { value: 'manual' }, 'Host order'),
+          React.createElement('option', { value: 'updated' }, 'Recently updated'),
         ),
       ),
       React.createElement(
@@ -1201,7 +1201,7 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
           checked: favoritesOnly,
           onChange: (e: React.ChangeEvent<HTMLInputElement>) => setFavoritesOnly(e.target.checked),
         }),
-        '仅收藏',
+        'Favorites only',
       ),
       // 全折叠 / 全展开：只在分组模式下出现（平铺模式没有可折叠的分组）。
       collapsibleKeys.length > 0
@@ -1210,10 +1210,10 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
             {
               type: 'button',
               className: 'dshsv-btn',
-              title: allCollapsed ? '展开所有工作区分组' : '折叠所有工作区分组（收起组内会话）',
+              title: allCollapsed ? 'Expand all workspace groups' : 'Collapse all workspace groups (hide their sessions)',
               onClick: toggleAllCollapsed,
             },
-            allCollapsed ? '全部展开' : '全部折叠',
+            allCollapsed ? 'Expand all' : 'Collapse all',
           )
         : null,
     ),
@@ -1233,13 +1233,13 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
         React.createElement(
           'div',
           { style: { padding: '2px 8px', fontSize: 11, opacity: 0.7 } },
-          `${shown.length} 个匹配`,
+          `${shown.length} matches`,
         ),
         shown.length === 0
           ? React.createElement(
               'div',
               { style: { padding: '4px 8px', opacity: 0.7 } },
-              searchPhase === 'loading' ? '检索中…' : '没有匹配的会话',
+              searchPhase === 'loading' ? 'Searching…' : 'No matching sessions',
             )
           : React.createElement(
               'div',
@@ -1275,7 +1275,7 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
       React.createElement(
         'div',
         { style: { padding: '2px 8px', fontSize: 11, opacity: 0.7 } },
-        `${flatRows.length} 个会话`,
+        `${flatRows.length} sessions`,
       ),
       React.createElement(
         'div',
@@ -1302,7 +1302,7 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
         ? React.createElement(
             'details',
             { style: { marginTop: 8, padding: '0 8px', opacity: 0.75 } },
-            React.createElement('summary', null, `已隐藏的工作区（${hiddenGroups.length}）`),
+            React.createElement('summary', null, `Hidden workspaces (${hiddenGroups.length})`),
             hiddenGroups.map((g) => hiddenTreeRow(g)),
           )
         : null,
@@ -1317,7 +1317,7 @@ export function WorkspaceTree(props: WorkspaceTreeProps) {
         ? React.createElement(
             'details',
             { style: { marginTop: 8, padding: '0 8px', opacity: 0.75 } },
-            React.createElement('summary', null, `已隐藏的工作区（${hiddenGroups.length}）`),
+            React.createElement('summary', null, `Hidden workspaces (${hiddenGroups.length})`),
             hiddenGroups.map((g) => workspaceBlock(g, true)),
           )
         : null,

@@ -1,119 +1,121 @@
-# dsh-plugin-sidebar-visibility 说明
+> Fork of [Robert-Wang-08/dsh-plugin-sidebar-visibility](https://github.com/Robert-Wang-08/dsh-plugin-sidebar-visibility) with an English UI.
 
-DSH Web GUI（`dsh web`，默认 `http://127.0.0.1:3080`）增强插件，九项功能共用一个包：
+# dsh-plugin-sidebar-visibility
 
-| 功能 | 入口 | 行为 |
+Enhancement plugin for the DSH Web GUI (`dsh web`, default `http://127.0.0.1:3080`). Eleven features share one package:
+
+| Feature | Entry | Behavior |
 | --- | --- | --- |
-| 工作区可视化隐藏 | 侧栏工作区行尾「隐藏」按钮 | 从树中收起，底部「已隐藏的工作区」折叠区一键恢复；会话数据不动 |
-| 工作区折叠 | 工作区标题行的 ▾/▸ 箭头、点标题本身，或树顶「全部折叠 / 全部展开」 | 收起该组会话行、标题行保留原位；折叠态随偏好持久化；与隐藏、归档互不影响 |
-| 工作区拖拽排序 | 拖动工作区标题行 | 拖到目标分组的上半 / 下半分别插到它前面 / 后面，落点显示 2px 主色线；顺序经 `IWorkspaces.insertBefore` 写回 Host，刷新后保持 |
-| 目录树视图 | 树顶「视图 → 按目录树」 | 已登记工作区按规范化目录的最近严格祖先自动嵌套（12px 缩进，rc.2 同口径）；父组折叠收起整棵子树；隐藏父区时子区上提到最近可见祖先；拖拽**仅同级重排**（目录父子由路径决定，拖不出来）；不虚构未登记目录、不改 Host 归属 |
-| 新建会话 | 工作区行尾「+」按钮 | 在该工作区进入新建会话流程；分组处于折叠态时先自动展开 |
-| 会话行动作 | 会话行悬停后，标题行**下方**出现竖排的「重命名 / 分叉 / 归档」 | 重命名就地输入（Enter 提交、Escape 取消）；分叉从最后一个完整回合切出子会话；归档后可在「设置 → 已归档会话」恢复 |
-| 已完成未读亮点 | 会话行右侧、置顶按钮左侧的小圆点 | 某会话在浏览器观察期间跑完（running true→false）且不是当前会话时出现，主色圆点 + 柔光；打开该会话即清除，状态持久化在同一个 localStorage 键；页面关闭期间完成的运行不记未读（列表没有运行完成时刻，不拿 updatedAt 猜） |
-| 会话收藏 + 仅收藏筛选 | 会话行标题行右端 ☆/★（常显）+ 树顶「仅收藏」开关 | 收藏纯前端派生视图，不写 Host 数据；已归档与 subagent 会话不显示也不可收藏 |
-| 运行中标识 + 计时 + 模型色 | 会话行标题左侧的彩色转圈环 + 模型徽标 + 分钟数 | 运行中时：转圈环与徽标底色取**该会话所选 provider 的 badge 配色**（用户自选色 > 默认色表 > 调色板，与输入框徽标同源，不复制色表），徽标右侧显示本次已运行 `Nm`；该行开始显示时已在运行的会话只给下限 `≥Nm`（rc.2 列表没有运行起点，不用 updatedAt 冒充）；回合结束即消失。颜色反映**会话选择**，不反映运行期 failover 后的实际执行模型 |
-| 会话列表模式切换 | 侧栏页脚「会话列表：插件列表 / 原始列表」按钮 | 一键在**插件增强树**与**官方原始 WorkspaceBrowser**之间热切换，无需重启 dsh；选择持久化在同一个 localStorage 键 |
-| Provider 挂起/恢复 | 设置 → 模型 → Provider 卡片上的开关 | 按该卡片自己的 `settingsPath` 定位：用户层有该 Provider 配置时暂存并 unset 这棵子树，纯组合层时写 `models: []` 覆盖；同族其他 Provider 不受影响，恢复时写回 |
+| Visual workspace hiding | "Hide" button at the end of a workspace row in the sidebar | Collapses the workspace out of the tree; restore it in one click from the "Hidden workspaces" section at the bottom; session data is untouched |
+| Workspace collapse | The ▾/▸ arrow on the workspace title row, clicking the title itself, or "Collapse all / Expand all" at the top of the tree | Collapses the group's session rows; the title row stays in place; the collapsed state is persisted with preferences; independent of hiding and archiving |
+| Workspace drag-and-drop reordering | Drag a workspace title row | Dropping in the upper / lower half of the target group inserts before / after it; the drop position shows a 2px primary-color line; the order is written back to the Host via `IWorkspaces.insertBefore` and persists after refresh |
+| Directory tree view | Top of the tree: "View → By directory tree" | Registered workspaces are automatically nested under their nearest strict ancestor by normalized directory (12px indentation, same rules as rc.2); collapsing a parent group collapses its entire subtree; hiding a parent moves its child workspaces up to the nearest visible ancestor; dragging **only reorders among siblings** (parent/child relationships are determined by path, so items cannot be dragged across levels); unregistered directories are not fabricated and Host ownership is not changed |
+| New session | "+" button at the end of a workspace row | Starts the new-session flow in that workspace; if the group is collapsed, it is expanded first |
+| Session row actions | Hovering a session row shows a vertical stack of "Rename / Fork / Archive" **below** the title row | Rename edits inline (Enter to submit, Escape to cancel); Fork creates a child session from the last complete turn; archived sessions can be restored under "Settings → Archived sessions" |
+| Completed-unread highlight | Small dot on the right side of a session row, left of the pin button | Appears when a session finishes (running true→false) while observed in the browser and is not the current session; shown as a primary-colored dot with a soft glow; opening the session clears it; the state is persisted under the same localStorage key; runs that finish while the page is closed are not marked unread (the list has no run-completion timestamp, so `updatedAt` is not used as a guess) |
+| Session favorites + "Favorites only" filter | ☆/★ at the right end of a session row's title row (always visible) + "Favorites only" toggle at the top of the tree | Favorites are a purely front-end derived view and do not write to Host data; archived and subagent sessions are neither shown nor favoritable |
+| Running indicator + timer + model color | Colored spinner ring and model badge plus elapsed minutes, to the left of the session title | While running, the spinner ring and badge background use the **provider badge color of the session's selected provider** (user-chosen color > default color table > palette; same source as the input-box badge, color table not duplicated); the badge shows elapsed `Nm` for this run to its right; a session already running when its row first appears only shows a lower bound `≥Nm` (the rc.2 list has no run start time, so `updatedAt` is not used as a stand-in); disappears when the turn ends. The color reflects the **session's selection**, not the actual model executing after a runtime failover |
+| Session list mode switch | "Session list: Plugin list / Raw list" button in the sidebar footer | Hot-switches in one click between the **plugin-enhanced tree** and the **official raw WorkspaceBrowser**, without restarting dsh; the choice is persisted under the same localStorage key |
+| Provider suspend/resume | Toggle on the provider card in Settings → Models | Targets the card's own `settingsPath`: if the user layer has this provider's configuration, it is stashed and that subtree is unset; if it exists only in the composition layer, `models: []` is written as an override; other providers in the same family are unaffected; resuming writes it back |
 
-所有状态持久化在浏览器 localStorage 单键 `dsh.sidebar-visibility.v1`，与官方侧栏展开状态同一惯例。
+All state is persisted in a single browser localStorage key, `dsh.sidebar-visibility.v1`, following the same convention as the official sidebar expansion state.
 
-## 安装
+## Installation
 
 ```powershell
 cd dsh-plugin-sidebar-visibility
-pnpm install        # 或 npm install
-pnpm run bundle     # 产出 lib/index.js + lib/client.js
+pnpm install        # or npm install
+pnpm run bundle     # produces lib/index.js + lib/client.js
 ```
 
-**产物已入库**：`lib/index.js`、`lib/client.js` 与两份 `.d.ts` 跟着源码一起提交，所以以 `link:` 登记的机器 `git pull` + 重启 `dsh web` + 刷新浏览器就能拿到新版，不需要重新 `dsh plugin add`。改动源码后先 `pnpm run bundle` 再提交，否则提交的是旧产物。
+**Build outputs are committed**: `lib/index.js`, `lib/client.js` and the two `.d.ts` files are committed together with the source. Machines registered with `link:` therefore get the new version via `git pull` + restarting `dsh web` + refreshing the browser; there is no need to run `dsh plugin add` again. After changing the source, run `pnpm run bundle` before committing, otherwise the old build outputs get committed.
 
-### 测试
+### Tests
 
 ```powershell
-node scripts/test-hierarchy.mjs   # 目录层级纯函数（26 项）
-node scripts/test-runtime.mjs     # 运行计时 + badge 展示桥契约（15 项，含跨插件真实契约）
-node scripts/test-bundle.mjs      # 构建产物冒烟（需先 bundle）
+node scripts/test-hierarchy.mjs   # pure directory-hierarchy functions (26 checks)
+node scripts/test-runtime.mjs     # run timer + badge display-bridge contract (15 checks, including the real cross-plugin contract)
+node scripts/test-bundle.mjs      # build-output smoke test (run bundle first)
 ```
 
-测试用 Node 内置 type stripping 直接导入 `.ts`，不依赖测试框架或额外安装。
+The tests import `.ts` files directly using Node's built-in type stripping, so no test framework or extra installs are required.
 
-## 挂载到 dsh web
+## Mounting into dsh web
 
-1. 在挂载 profile 的 `cordis.patch.yml`（或 `$DSH_HOME/cordis.patch.yml`）的 browser roster 段加一行，参照 `cordis.patch.example.yml`：
+1. In the `cordis.patch.yml` of the mount profile (or `$DSH_HOME/cordis.patch.yml`), add a line to the browser roster section, following `cordis.patch.example.yml`:
 
    ```yaml
    - id: sidebar-visibility
      name: '@local/dsh-plugin-sidebar-visibility'
    ```
 
-2. 让 `dsh-client-modules` 能解析到本包：在 DSH 运行目录的依赖里链接本包（`pnpm link` / file: 依赖），或把本目录放进 dsh 的插件搜索路径。
-3. 重启 `dsh web` 后打开 GUI 验证：
-   - 侧栏会话树被本树替换（顶部出现「仅收藏」开关）；
-   - 设置 → 模型 的每个 Provider 卡片出现「挂起 Provider」按钮。
+2. Make `dsh-client-modules` able to resolve this package: link it in the DSH runtime directory's dependencies (`pnpm link` / `file:` dependency), or add this directory to dsh's plugin search path.
+3. Restart `dsh web`, then open the GUI and verify:
+   - The sidebar session tree is replaced by this tree (a "Favorites only" toggle appears at the top);
+   - Each provider card under Settings → Models shows a "Suspend provider" button.
 
-开发时跑 `pnpm run dev:web`（DSH checkout 内）可热重载本插件改动；日常用 `pnpm run watch` 重建产物即可。
+During development, run `pnpm run dev:web` (inside a DSH checkout) to hot-reload changes to this plugin; for day-to-day work, `pnpm run watch` rebuilding the outputs is enough.
 
-## 使用
+## Usage
 
-- **隐藏工作区**：工作区标题行点「隐藏」→ 整个工作区（含其会话）从树消失；树底「已隐藏的工作区（N）」展开后点「恢复」还原。
-- **折叠工作区**：点标题行左侧 ▾/▸ 箭头，或直接点标题 → 该组会话行收起 / 展开，标题行始终留在原位；折叠时标题右侧显示组内会话数。折叠态与隐藏态相互独立，刷新后保持。
-- **目录树视图**：树顶「视图」选「按目录树」→ 已登记工作区按目录的最近严格祖先自动嵌套成多层（rc.2 口径：Windows 盘符/UNC 归一斜杠、**大小写敏感**、按完整路径段比较），组头有文件夹轮廓与缩进；折叠父组会收起**整棵子树**；隐藏某个父工作区时，其可见子工作区上提到最近可见祖先（底部折叠区只留恢复入口）。拖拽只在**同一父级**内重排，跨级落点显示禁止光标且不写 Host；「未分组」伪组固定追加在树尾。原有的「按工作区 / 一个列表」两档仍然保留，旧偏好不受影响。
-- **全部折叠 / 全部展开**：树顶视图选项行右侧的按钮，一次收起或展开当前所有可见分组；有任一分组展开时显示「全部折叠」，全部分组已折叠后显示「全部展开」。已隐藏的分组不参与（它们本就没有折叠箭头），其折叠态原样保留；平铺模式下不显示该按钮。
-- **工作区拖拽排序**：按住工作区标题行拖动 → 拖到目标分组的**上半**插到它前面、**下半**插到它后面，落点位置显示一条 2px 主色线。松开即写入 Host 顺序，刷新后保持。「未分组」伪组不参与拖拽，也不能作为落点；拖回原位不发请求。
-- **新建会话**：工作区行尾点「+」→ 在该工作区进入新建会话流程。分组处于折叠态时先自动展开，与官方项目行加号的行为一致。
-- **会话行动作**：鼠标移到会话行上，标题行**下方**出现竖排的「重命名 / 分叉 / 归档」三个按钮；☆/★ 常显在标题行右端。
-  - 重命名：点「重命名」→ 标题就地变成输入框 → Enter 提交、Escape 取消；宿主拒绝时错误消息显示在标题下方。
-  - 分叉：点「分叉」→ 从该会话的最后一个完整回合切出新会话并打开。
-  - 归档：点「归档」→ 会话从树中消失，可在「设置 → 已归档会话」恢复。
-- **已完成未读**：某个会话跑完（转圈消失）且你还没打开它时，行右侧会出现一个主色小圆点（置顶按钮左边）；点开该会话即清除。仅记录**页面打开期间**观察到的完成，刷新或换设备后不复现；正在看的会话跑完不算未读。
-- **收藏会话**：会话行点 ☆ 变 ★；勾选树顶「仅收藏」后全树只显示收藏行，标题栏显示收藏数。
-- **运行中标识与计时**：某会话正在运行时，其标题左侧出现**彩色**转圈环 + 模型徽标 + 已运行分钟数（如 `[a1gpt] 3m`）。颜色来自 provider-badge 的只读展示桥（与输入框徽标同一种颜色解析，含你的自选色）；**非当前打开的会话**用会话投影里的 provider + badge 纯色表上色，不必先把会话点开，悬停显示 provider 全名、模型名与计时口径。计时只统计**浏览器实际观察到的连续运行区间**：该行开始显示时已在运行的会话显示 `≥Nm` 下限，不拿最后更新时间冒充起点；回合结束后自动消失。语义与官方 ongoing 状态一致，对分组视图与检索结果行同样生效。
-- **切换会话列表模式**：点侧栏页脚的「会话列表：插件列表 / 原始列表」按钮，在插件增强树与官方原始列表之间一键热切换（无需重启 dsh）。切到「原始列表」时本插件的 `sidebar.workspaces` 占用者被卸载，官方 WorkspaceBrowser 立即接管；切回「插件列表」即重新注册，增强功能（隐藏 / 折叠 / 收藏 / 拖拽排序等）全部恢复。页脚按钮常驻，两种模式下都可见。
-- **挂起 Provider**：设置 → 模型，在目标卡片点「挂起 Provider」→ 该 Provider 的配置被暂存、模型从选择器消失；同位置点「恢复 Provider」写回。**粒度是该卡片自己的 `settingsPath`**，同一命名空间下的其他 Provider 不受影响。挂起期间新会话无法选到该 Provider；已固定在它上面的存量会话预期进入不可路由禁用态，恢复后自动解除（此点为首验清单第 2 项）。
+- **Hide a workspace**: click "Hide" on the workspace title row → the whole workspace (including its sessions) disappears from the tree; expand "Hidden workspaces (N)" at the bottom of the tree and click "Restore" to bring it back.
+- **Collapse a workspace**: click the ▾/▸ arrow on the left of the title row, or click the title directly → the group's session rows collapse / expand, while the title row always stays in place; when collapsed, the session count of the group is shown to the right of the title. Collapsed and hidden states are independent and persist across refreshes.
+- **Directory tree view**: in the tree's "View" menu, choose "By directory tree" → registered workspaces are automatically nested into multiple levels by their nearest strict directory ancestor (rc.2 rules: Windows drive letters / UNC normalized to forward slashes, **case-sensitive**, compared by full path segments); group headers show a folder outline icon and indentation; collapsing a parent group collapses its **entire subtree**; when hiding a parent workspace, its visible child workspaces move up to the nearest visible ancestor (the bottom collapsed section only keeps the restore entry). Dragging only reorders within the **same parent**; a cross-level drop shows a "not allowed" cursor and does not write to the Host; the "Ungrouped" pseudo-group is always appended at the end of the tree. The existing "By workspace" and "Single list" modes are still available, and old preferences are unaffected.
+- **Collapse all / Expand all**: the button on the right of the view options row at the top of the tree; collapses or expands all currently visible groups at once. It shows "Collapse all" while any group is expanded, and "Expand all" once all groups are collapsed. Hidden groups do not take part (they have no collapse arrow to begin with), and their collapsed state is kept as-is; the button is not shown in flat mode.
+- **Workspace drag-and-drop reordering**: press and drag a workspace title row → drop it on the **upper half** of the target group to insert before it, or the **lower half** to insert after it; a 2px primary-color line marks the drop position. Releasing writes the order to the Host, and it persists across refreshes. The "Ungrouped" pseudo-group does not take part in dragging and cannot be a drop target; dragging back to the original position sends no request.
+- **New session**: click "+" at the end of a workspace row → starts the new-session flow in that workspace. If the group is collapsed, it is expanded first, matching the behavior of the official project-row plus button.
+- **Session row actions**: hover over a session row and three vertically stacked buttons, "Rename / Fork / Archive", appear **below** the title row; ☆/★ is always visible at the right end of the title row.
+  - Rename: click "Rename" → the title turns into an input box in place → Enter to submit, Escape to cancel; if the Host rejects the change, the error message appears below the title.
+  - Fork: click "Fork" → creates a new session from the last complete turn of this session and opens it.
+  - Archive: click "Archive" → the session disappears from the tree; it can be restored under "Settings → Archived sessions".
+- **Completed-unread**: when a session finishes running (spinner disappears) and you have not opened it yet, a small primary-colored dot appears on the right side of the row (left of the pin button); opening the session clears it. Only completions observed **while the page is open** are recorded; they do not reappear after a refresh or on another device. A session you are watching when it finishes is not counted as unread.
+- **Favorite sessions**: click ☆ on a session row to turn it into ★; checking "Favorites only" at the top of the tree shows only favorited rows across the whole tree, and the header shows the favorite count.
+- **Running indicator and timer**: while a session is running, a **colored** spinner ring + model badge + elapsed minutes (e.g. `[a1gpt] 3m`) appear to the left of its title. The color comes from the read-only display bridge of provider-badge (same color resolution as the input-box badge, including your custom color). **Sessions that are not currently open** are colored using the provider and the solid color table of the badge from the session projection, so you do not need to open the session first; hovering shows the provider's full name, model name, and timing basis. The timer only counts **continuous running intervals actually observed by the browser**: a session already running when its row first appears shows a `≥Nm` lower bound, and the last-updated time is not used as a stand-in start; it disappears automatically when the turn ends. The semantics match the official ongoing status, and it applies equally to grouped views and search result rows.
+- **Switching session list mode**: click the "Session list: Plugin list / Raw list" button in the sidebar footer to hot-switch between the plugin-enhanced tree and the official raw list without restarting dsh. When switching to "Raw list", this plugin's occupant of `sidebar.workspaces` is unmounted and the official WorkspaceBrowser takes over immediately; switching back to "Plugin list" re-registers it, and all enhanced features (hide / collapse / favorites / drag-and-drop reordering, etc.) are restored. The footer button is always present and visible in both modes.
+- **Suspend provider**: in Settings → Models, click "Suspend provider" on the target card → the provider's configuration is stashed and its models disappear from the model picker; clicking "Resume provider" in the same spot writes it back. **The granularity is the card's own `settingsPath`**; other providers in the same namespace are not affected. While suspended, new sessions cannot select this provider; existing sessions pinned to it are expected to enter a non-routable disabled state, which is cleared automatically after resuming (this point is item 2 of the First-run checklist).
 
-## 复核确认的事实（本版代码的全部依据）
+## Verified facts (the basis for all of this version's code)
 
-- 席位注册：`ctx.slots.inject(seat, () => ctx.slots.register(options, Component))`，options 含 `name / key / children / store / inject / locale`（先例 `dsh-client-ui-workspace/lib/client.js`）。
-- 席位遮蔽：single 席位后注册者遮蔽官方占用者（`dsh-client-ui-renderer` registry.d.ts 的优先级注释），官方树无需禁用。
-- keyed 席位：注册带 `key`，无通配；本版覆盖 `llm-deepseek` / `llm-pi-ai` 两个内置命名空间。
-- 数据钩子：`useWorkspaces` → `WorkspaceSnapshot { items, archivedSessionIds }`；`useSessions` → `SessionListState { ids, byId, current }`；`WorkspaceView { workspaceId, title, path, sessionIds }`；`SessionSummary { id, displayTitle, origin, blank, running, updatedAt }`。
-- 动作服务：`ctx.uiWorkspace`（`openSession / startSession / openWorkspace / connectWorkspace / forkSession / archiveSession`），cordis inject 名 `uiWorkspace`。
-- 会话重命名：官方 `renameSession` 走 `ctx.get('sessions').binding(id)?.session.rename(title)`，返回 `RemoteResult<{ title, seq }>`；未绑定会话与拒绝结果都由调用方抛错（先例 `dsh-client-ui-workspace/lib/client.js` 的 `browserInjected()`）。本插件复用同一条路径，错误消息就地显示在标题下方。
-- 官方会话行菜单：`dsh-client-ui-workspace` 的 `SessionNodeItem` 提供 `rename / fork / archive` 三项（工作区行另有 `rename / delete`，本插件未实现）；`rowActions` 平时隐藏、行悬停显示，本插件用 `.dshsv-rowActions` + 内联 `<style>` 复刻该行为，并把三个动作改为标题行下方的竖排，避免窄侧栏里遮挡会话名。
-- 官方新建会话按钮：工作区行右侧的加号（`IconPlusOutline16`）在 `onClick` 里先 `setGroupExpanded(key, true)` 再 `startSession(workspaceId)`；本插件按同一语义实现，折叠态下点击会先解除折叠。
-- 工作区拖拽排序：走**纯 Workspace Controller**，不是 `uiWorkspace` —— cordis inject 名 `workspaces`，方法 `insertBefore(workspaceId, beforeWorkspaceId?)`，`beforeWorkspaceId` 省略表示移到末尾（官方 `browserInjected()` 的 `insertWorkspaceBefore` 同一条路径）。落点半边由指针是否在目标组高度的上半决定（官方 `workspaceGroupHalf`）；自身位置与「已在锚点前一位」两种无变化情形直接返回，不发请求。
-- 内联 `<style>` 的转义陷阱（踩过两次）：React 会把文本里的 `"` `'` `&` `<` `>` 转成 HTML 实体，而 `<style>` 是 raw text 元素**不解码**实体，规则会静默失效。因此该 CSS 串里不能出现这些字符 —— 例如 `content:""` 会变成 `content:&quot;&quot;`。画线改用 `box-shadow`（无引号、不占布局）。
-- 侧栏按钮尺寸：浏览器默认 `button` 样式在窄侧栏里偏大，本插件统一用 `.dshsv-btn` 压到 11px / 16px 行高 / `1px 6px` 内边距，悬停给一层浅底色。
-- 席位派发粒度（踩过坑）：`settings.models.provider-card` 按 `settingsNs` 派发 —— 注册一次会收到该命名空间下的**每一张**卡片（已保存、新增、手写声明的都算），每张卡片带自己的 `settingsPath`（官方 slot-contract 原文：an adapter family's companion plugin registers one entry under the family's namespace and receives every card of that family）。因此挂起/恢复必须按 `settingsPath` 定位；动整个命名空间会把同族 Provider 一起清掉。官方删除 Provider 用的也是 `{ op: 'unset', path: [...settingsPath] }`。
-- 根级 Provider（`settingsPath` 为空，如 `deepseek-official` 之于 `llm-deepseek`）拥有整个命名空间：挂起走用户层整段逐键 unset，恢复必须用 `update(ns, section)` 整段合并写回 —— 空路径无法用 `mutate set path: []` 寻址命名空间根。
-- settings 写读：`ctx.remote.settings.describe() → { user?, revision }`；`update / replace / mutate(ns, [{ op: 'set'|'unset', path, value? }], expectedRevision)`（op 先例 `pathOps()`）；Provider 卡片 owner props 携带 `settingsPath` 直接给出用户层寻址路径。
-- 运行中数据源：`SessionSummary.running`（官方 0.2.0-rc.2 与本仓 0.1.6-alpha.2 同形）。官方树以 `status?.running ?? summary.running` 派生 `ongoing` 状态点，本插件直接取 `byId[id].running` 显示转圈环。
-- 页脚席位：`sidebar.footer.action`（`kind: 'list'`、`scope: 'root'`、owner props `{ wide }`），由官方 ui-sidebar 的 `sidebar` 条目声明并在 `SidebarRoot` 常驻渲染；list 注册带 `id` / `order`。
-- 热切换的 API 依据：`ctx.slots.register(...)` 与 `ctx.slots.inject(...)` 都返回幂等 disposer，调用即移除占用者。single 席位按 priority 升序取**首个存活**条目（`dsh-client-ui-slots` renderer：first live entry per cell in priority order），故卸载 priority -1 的插件占用者后，官方 priority 0 占用者立即接管；重新注入即恢复。
+- Seat registration: `ctx.slots.inject(seat, () => ctx.slots.register(options, Component))`, where options contain `name / key / children / store / inject / locale` (precedent: `dsh-client-ui-workspace/lib/client.js`).
+- Seat shadowing: for a single seat, the later registrant shadows the official occupant (priority comment in `dsh-client-ui-renderer` registry.d.ts), so the official tree does not need to be disabled.
+- Keyed seats: registration carries a `key`, with no wildcard; this version covers the two built-in namespaces `llm-deepseek` / `llm-pi-ai`.
+- Data hooks: `useWorkspaces` → `WorkspaceSnapshot { items, archivedSessionIds }`; `useSessions` → `SessionListState { ids, byId, current }`; `WorkspaceView { workspaceId, title, path, sessionIds }`; `SessionSummary { id, displayTitle, origin, blank, running, updatedAt }`.
+- Action service: `ctx.uiWorkspace` (`openSession / startSession / openWorkspace / connectWorkspace / forkSession / archiveSession`), cordis inject name `uiWorkspace`.
+- Session rename: the official `renameSession` goes through `ctx.get('sessions').binding(id)?.session.rename(title)` and returns `RemoteResult<{ title, seq }>`; both unbound sessions and rejected results are thrown as errors by the caller (precedent: `browserInjected()` in `dsh-client-ui-workspace/lib/client.js`). This plugin reuses the same path, and error messages are shown in place below the title.
+- Official session-row menu: `SessionNodeItem` in `dsh-client-ui-workspace` provides three items, `rename / fork / archive` (workspace rows additionally have `rename / delete`, which this plugin does not implement); `rowActions` is normally hidden and shown on row hover. This plugin replicates that behavior with `.dshsv-rowActions` + an inline `<style>`, and moves the three actions to a vertical stack below the title row to avoid covering session names in the narrow sidebar.
+- Official new-session button: the plus icon on the right of a workspace row (`IconPlusOutline16`) calls `setGroupExpanded(key, true)` and then `startSession(workspaceId)` in its `onClick`; this plugin implements the same semantics, so clicking while collapsed first expands the group.
+- Workspace drag-and-drop reordering: goes through the **pure Workspace Controller**, not `uiWorkspace` — cordis inject name `workspaces`, method `insertBefore(workspaceId, beforeWorkspaceId?)`; omitting `beforeWorkspaceId` moves the item to the end (same path as `insertWorkspaceBefore` in the official `browserInjected()`). Which half the drop lands in is determined by whether the pointer is in the upper half of the target group's height (official `workspaceGroupHalf`); the two no-change cases, its own position and "already directly before the anchor", return immediately without sending a request.
+- Escaping pitfall with inline `<style>` (hit twice): React converts `"` `'` `&` `<` `>` in text into HTML entities, but `<style>` is a raw text element that does **not decode** entities, so rules silently fail. Therefore these characters must not appear in the CSS string; for example `content:""` becomes `content:&quot;&quot;`. Draw lines with `box-shadow` instead (no quotes, takes no layout space).
+- Sidebar button size: the browser's default `button` styling is too large in the narrow sidebar, so this plugin uses `.dshsv-btn` across the board to reduce it to 11px / 16px line height / `1px 6px` padding, with a light background on hover.
+- Seat dispatch granularity (a pitfall we hit): `settings.models.provider-card` is dispatched by `settingsNs`. A single registration receives **every** card in that namespace (saved, newly added, and hand-declared ones all count), and each card carries its own `settingsPath` (official slot-contract text: an adapter family's companion plugin registers one entry under the family's namespace and receives every card of that family). Therefore suspend/resume must target by `settingsPath`; acting on the whole namespace would also clear other providers of the same family. The official provider deletion also uses `{ op: 'unset', path: [...settingsPath] }`.
+- Root-level provider (empty `settingsPath`, e.g. `deepseek-official` within `llm-deepseek`) owns the entire namespace: suspending performs a key-by-key unset of the whole section in the user layer, and resuming must write it back as a whole-section merge via `update(ns, section)`. An empty path cannot address the namespace root with `mutate set path: []`.
+- Settings read/write: `ctx.remote.settings.describe() → { user?, revision }`; `update / replace / mutate(ns, [{ op: 'set'|'unset', path, value? }], expectedRevision)` (precedent for op: `pathOps()`); the provider card's owner props carry `settingsPath`, which gives the user-layer addressing path directly.
+- Running data source: `SessionSummary.running` (the official 0.2.0-rc.2 and this repo's 0.1.6-alpha.2 have the same shape). The official tree derives the `ongoing` status dot from `status?.running ?? summary.running`; this plugin reads `byId[id].running` directly to show the spinner ring.
+- Footer seat: `sidebar.footer.action` (`kind: 'list'`, `scope: 'root'`, owner props `{ wide }`), declared by the official ui-sidebar's `sidebar` entry and rendered persistently in `SidebarRoot`; list registrations carry `id` / `order`.
+- API basis for hot switching: `ctx.slots.register(...)` and `ctx.slots.inject(...)` both return idempotent disposers; calling one removes the occupant. For a single seat, the first live entry in ascending priority order wins (`dsh-client-ui-slots` renderer: first live entry per cell in priority order), so after unmounting the plugin occupant at priority -1, the official occupant at priority 0 takes over immediately; re-injecting restores it.
 
-## 首验清单（实跑时按序确认）
+## First-run checklist (confirm in order during the first live run)
 
-1. 本树遮蔽官方树后，仍缺的官方交互：会话级拖拽排序、工作区重命名 / 删除、新建工作区（工作区级 拖拽排序 / 新建会话，以及会话级 重命名 / 分叉 / 归档 已补齐）。
-2. 挂起对存量会话的实际表现（预期不可路由禁用态）。
-3. `llm-pi-ai` 用户层 unset 后路由是否热注销（`llm/adapters-updated` 广播）。
-4. localStorage 单键的多账号串扰（官方有 account key 派生，迭代 2 对齐）。
-5. 用户手配命名空间的 Provider 卡片注册（当前只覆盖两个内置 key）。
-6. 重命名对未绑定会话的表现（官方同路径会抛 `unknown session`；若列表里的非当前会话普遍未绑定，需改走 `sessionController` 的 rename RPC）。
-7. 会话列表模式热切换：点页脚按钮切到「原始列表」后官方 WorkspaceBrowser 是否完整接管、切回「插件列表」后本插件功能是否全部恢复；以及侧栏 rail 模式下页脚按钮的显示。
+1. Once this tree shadows the official tree, the official interactions still missing are: session-level drag-and-drop reordering, workspace rename / delete, and new workspace (workspace-level drag-and-drop reordering / new session, and session-level rename / fork / archive are already covered).
+2. Actual behavior of existing sessions after suspension (expected: a non-routable disabled state).
+3. Whether routes are hot-unregistered after a user-layer unset on `llm-pi-ai` (`llm/adapters-updated` broadcast).
+4. Cross-account interference with the single localStorage key (the official code derives per-account keys; aligned in iteration 2).
+5. Provider card registration for user-defined namespaces (currently only the two built-in keys are covered).
+6. Behavior of rename on unbound sessions (the official same path throws `unknown session`; if non-current sessions in the list are commonly unbound, switch to the rename RPC of `sessionController`).
+7. Hot switching of session list mode: after clicking the footer button to switch to "Raw list", whether the official WorkspaceBrowser fully takes over; after switching back to "Plugin list", whether all plugin features are restored; and the display of the footer button in sidebar rail mode.
 
-## 迭代计划
+## Iteration plan
 
-- 迭代 1（当前）：挂载跑通 + 七功能最小闭环（隐藏 / 折叠 / 工作区拖拽排序 / 新建会话 / 会话行动作 / 收藏 / Provider 挂起）。
-- 迭代 2：subagent `allowedModels` 快照剔除；树内搜索框与「仅收藏」对 Host 内容搜索的二次过滤；account key 对齐；补齐官方树交互（会话级拖拽排序、工作区重命名 / 删除）。
-- 迭代 3：评估给上游提 `hiddenWorkspaceIds` / `favoriteSessionIds` / `collapsedWorkspaceIds`（照 `archivedSessionIds` 模式进 Host 基线）。
+- Iteration 1 (current): get mounting working + a minimal closed loop of seven features (hide / collapse / workspace drag-and-drop reordering / new session / session row actions / favorites / Provider suspend).
+- Iteration 2: strip the subagent `allowedModels` snapshot; secondary filtering of Host content search by the in-tree search box and "Favorites only"; align the account key; fill in the missing official tree interactions (session-level drag-and-drop reordering, workspace rename / delete).
+- Iteration 3: evaluate proposing `hiddenWorkspaceIds` / `favoriteSessionIds` / `collapsedWorkspaceIds` upstream (following the `archivedSessionIds` pattern into the Host baseline).
 
-## 宿主兼容性（2026-09-23 复查：dsh 0.1.5-rc.3 + dsh-permission-compat）
+## Host compatibility (reviewed 2026-09-23: dsh 0.1.5-rc.3 + dsh-permission-compat)
 
-宿主升级 `0.1.5-rc.2 → rc.3`（npm latest）并打上全局 `dsh-permission-compat` 沙箱补丁（改 `dsh-sandbox` + 三个工具守卫）后复查，**本插件零改动可用**：
+After the host was upgraded `0.1.5-rc.2 → rc.3` (npm latest) and the global `dsh-permission-compat` sandbox patch (modifying `dsh-sandbox` + three tool guards) was applied, this was re-checked: **this plugin works with zero changes**:
 
-- 与补丁无关：源码与构建产物（`lib/index.js`、`lib/client.js`）不引用 `sandbox_permissions` / `justification` / `approveEscalation` 等提权 API（grep 零命中）。
-- 与 rc.3 无关：rc.3 的 `dsh-client-ui-sidebar/lib/client.js` 相比 rc.2 仅 `localBuildVersion()` 里品牌徽标版本号字符串 1 行差异，无 API/行为变化，本插件不依赖该值。
-- 已知构建现状（非本次引入）：`src/index.ts` import 了 `@deepseek-ai/dsh-api-settings-controller`，但构建出的 `lib/index.js` 是无 import 的 199B 占位 stub——rc.3 下无影响；下次改动本插件时核对 `tsdown.config.ts`。
+- Unrelated to the patch: the source and build outputs (`lib/index.js`, `lib/client.js`) do not reference privilege-escalation APIs such as `sandbox_permissions` / `justification` / `approveEscalation` (grep returns zero matches).
+- Unrelated to rc.3: compared with rc.2, `dsh-client-ui-sidebar/lib/client.js` in rc.3 differs only by a one-line change to the brand badge version string inside `localBuildVersion()`; there are no API or behavior changes, and this plugin does not depend on that value.
+- Known build status (not introduced this time): `src/index.ts` imports `@deepseek-ai/dsh-api-settings-controller`, but the built `lib/index.js` is a 199-byte placeholder stub with no imports. This has no impact under rc.3; when next changing this plugin, check `tsdown.config.ts`.
 
-复查记录见 vault `70-WorkSpace/dsh工具维护日志.md` 2026-09-23 条目；复装说明见 `70-WorkSpace/dsh复装说明.md`。
+Review record: see the 2026-09-23 entry in the vault file `70-WorkSpace/dsh工具维护日志.md`; reinstall notes: see `70-WorkSpace/dsh复装说明.md`.

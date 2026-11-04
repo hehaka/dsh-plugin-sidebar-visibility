@@ -89,13 +89,13 @@ function runtimeTitle(
   const minutes = ms === null ? 0 : Math.floor(ms / 60000)
   const span =
     ms === null
-      ? '正在运行'
+      ? 'Running'
       : lowerBound
-        ? `已运行至少 ${Math.max(1, minutes)} 分钟（这一行开始显示时已在运行，真实起点不可知）`
+        ? `Running for at least ${Math.max(1, minutes)} min (already running when this row first appeared; true start unknown)`
         : minutes < 1
-          ? '本次运行不足 1 分钟'
-          : `本次运行约 ${minutes} 分钟`
-  if (presentation === null) return `${span} · 模型信息不可用（provider-badge 未启用或目录未就绪）`
+          ? 'Running for under 1 min'
+          : `Running for about ${minutes} min`
+  if (presentation === null) return `${span} · Model info unavailable (provider-badge not enabled or catalog not ready)`
   return `${span} · ${presentation.providerName} · ${presentation.modelName}`
 }
 
